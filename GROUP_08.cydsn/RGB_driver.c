@@ -14,6 +14,7 @@
 #include "InterruptRoutines.h"
 #include "project.h"
 
+
 volatile uint8_t byte_C,byte_T, header_C, header_T, status, received, seconds;
 //volatile uint16_t period;
 volatile char b;
@@ -22,7 +23,8 @@ static void RGBLed_Writegreen (uint8_t green);
 static void RGBLed_Writeblue (uint8_t blue);
 
 void set_idle(){
-        
+    
+        //reset all FLAGS and timer
         header_C = HEADER_NOT_RECEIVED;
         byte_C = NOT_RECEIVED;
     
@@ -38,6 +40,7 @@ void set_idle(){
         b=0;
     }
 
+
 //function which will start PWM
 void RGBLed_Start()
     {
@@ -46,15 +49,23 @@ void RGBLed_Start()
         }
     
     
-    //functions which will set the color
+//function which starts the timeout  
+void timer_count(){
+            Timer_Stop();
+            seconds = 0;
+            Timer_WriteCounter(999);
+            Timer_Start();
+}
+    
+    
+//functions which will set the color
 void RGBLed_setColor(color c)    
     {   
            RGBLed_WriteRed(c.red);
            RGBLed_Writegreen(c.green);
            RGBLed_Writeblue(c.blue);
     }
-  
-    
+     
 static void RGBLed_WriteRed (uint8_t red)
 {
     PWM_RG_WriteCompare1(red);
