@@ -16,7 +16,6 @@
 
 
 volatile uint8_t byte_C,byte_T, header_C, header_T, status, received, seconds;
-//volatile uint16_t period;
 volatile char b;
 static void RGBLed_WriteRed (uint8_t red);
 static void RGBLed_Writegreen (uint8_t green);

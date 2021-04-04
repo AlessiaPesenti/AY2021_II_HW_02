@@ -20,11 +20,20 @@ extern volatile color input_color;
 extern volatile uint8_t timeout,received, seconds;
 extern volatile uint8_t connection;
 
+
+CY_ISR(Custom_TIMER_ISR){
+    Timer_ReadStatusRegister();
+    seconds++;
+    
+    if (seconds == timeout)
+        {   
+            set_idle();
+        }
+}
+
+
 CY_ISR(Custom_UART_RX_ISR)
 {
-    
-
-    
     if (UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY && status == FREE)
         {
                     received = UART_ReadRxData();
@@ -44,14 +53,15 @@ CY_ISR(Custom_UART_RX_ISR)
                     status = RECEIVING_TIMEOUT;
                     header_T = HEADER_RECEIVED;
                     byte_T = RECEIVED;
-                    timer_count(); 
-                }
+                  }
+                
                 else if (received == CONNECTION_CMD) {
                     
                     //SET FLAG
                     connection = RECEIVED;
                     
                 }
+                
                 else if (received != HEADER_COLOR && received != HEADER_TIMER && received != CONNECTION_CMD){
                     
                     set_idle();
@@ -95,5 +105,29 @@ CY_ISR(Custom_UART_RX_ISR)
             default: break;
             }
         }
-}
+        
+        
+          if(UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY && header_T == HEADER_RECEIVED && status == RECEIVING_TIMEOUT ) 
+        {   received = UART_ReadRxData(); 
+        
+            switch(byte_T){
+                
+            case 1: 
+                
+                    timeout = received;
+                    byte_T ++;
+                    break;
+
+            case 2: if(received == TAIL_VALUE){ 
+                    byte_T ++;
+                    
+                    break;}
+            
+                    else break;
+            
+            default: break;
+            }
+        }
+        
+    }
 /* [] END OF FILE */
