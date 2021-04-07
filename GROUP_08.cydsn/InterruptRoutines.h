@@ -13,13 +13,15 @@
 #define TAIL_VALUE 192
 #define HEADER_TIMER 161
 #define CONNECTION_CMD 118
+#define DEFAULT_5S 5
 
-#define HEADER_NOT_RECEIVED 0
-#define HEADER_RECEIVED 1
+
 #define NOT_RECEIVED 0
 #define RECEIVED 1
 
-#define FREE 0
+#define HEADER_RECEIVED 1
+
+#define IDLE 0
 #define RECEIVING_COLOR 1
 #define RECEIVING_TIMEOUT 2
 
@@ -27,9 +29,17 @@
     #define __INTERRUPT_ROUTINES_H__
     
     #include "project.h"
+    #include "RGB_driver.h"
+    
+    volatile uint8_t byte_C, byte_T, received, flag;
+
+    volatile uint8_t timeout, seconds;
+
+    volatile color input_color;
     
     CY_ISR_PROTO(Custom_UART_RX_ISR);
-    CY_ISR_PROTO(Custom_TIMER_ISR);
+    CY_ISR_PROTO(Custom_Timer_ISR);
     
 #endif
+
 /* [] END OF FILE */

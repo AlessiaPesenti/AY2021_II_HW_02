@@ -15,7 +15,7 @@
 #include "project.h"
 
 
-volatile uint8_t byte_C,byte_T, header_C, header_T, status, received, seconds;
+volatile uint8_t byte_C,byte_T, received, seconds;
 volatile uint8_t b;
 static void RGBLed_WriteRed (uint8_t red);
 static void RGBLed_Writegreen (uint8_t green);
@@ -24,16 +24,13 @@ static void RGBLed_Writeblue (uint8_t blue);
 void set_idle(){
     
         //reset all FLAGS and timer
-        header_C = HEADER_NOT_RECEIVED;
         byte_C = NOT_RECEIVED;
-    
-        header_T = HEADER_NOT_RECEIVED;
+
         byte_T = NOT_RECEIVED;    
     
         seconds = 0;
         Timer_Stop();
         
-        status = FREE;
         received = NOT_RECEIVED;
      
         b=0;

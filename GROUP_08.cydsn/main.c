@@ -1,45 +1,75 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * ASSIGNMENT 02 - GROUP 08
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * @authors Giovanni Parrella & Alessia Pesenti
+ * @date 08/04/2021
  *
  * ========================================
 */
+/*
+ * RGB LED Color selection project - CY8CKIT-059 KIT - See TopDesign for more info on the hardware connections/settings.
+ *
+ * This project can be used to turn on a RGB LED, selecting the color through a custom GUI and UART communication.
+ * Baude rate was set to 9600.
+ * In order to communicate the color, the following packet must be sent: [0XA0(160), Red (0-255), Green(0-255), Blue(0-255), 0XC0(192)]
+ * The timeout configuration can be useful when testing this code on a serial port terminal app (as CoolTerm). 
+ * In order to communicate the timeout value, the following packet must be sent: [0XA1(161), timeout value(1-20), 0XC0(192)].
+
+*/
+
 #include "project.h"
 #include "stdio.h"
 #include "RGB_driver.h"
 #include "InterruptRoutines.h"
 
-volatile uint8_t byte_C, byte_T, seconds, timeout;
-volatile uint8_t header_C, header_T,status,connection;
-volatile color input_color;
 
-extern volatile uint8_t b;
 static char message [20] = {'\0'};
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
-      /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    
+    // Start PWM and UART
     RGBLed_Start();
     UART_Start();
     
-    set_idle();//init
-    timeout = 5; 
+    // Initialize FLAGS and counters to IDLE (everything to 0, timer stopped)
+    set_idle();
     
-    isr_Timer_StartEx(Custom_TIMER_ISR);
+    // Initialize timeout to 5 seconds
+    timeout = DEFAULT_5S; 
+    
+    // Start ISRs with custom functions
+    isr_Timer_StartEx(Custom_Timer_ISR);
     isr_UART_StartEx(Custom_UART_RX_ISR);
     
        
     for(;;)
     {
-        /* Place your application code here. */
-        
+        if (flag == RECEIVED && byte_C == IDLE && byte_T == IDLE){
+                    
+                           
+            switch(received) {
+            case HEADER_COLOR:  byte_C = HEADER_RECEIVED; //note that = RECEIVING RED
+                                //Start timeout
+                                timer_count();
+                                break;
+                                        
+            case HEADER_TIMER:  byte_T = HEADER_RECEIVED;
+                                break;
+                                        
+            case CONNECTION_CMD:sprintf(message, "RGB LED Program $$$");   //If the command 'v' is received, print the string "RGB LED Program $$$"
+                                //send through UART
+                                UART_PutString(message);
+                                set_idle();
+                                break;
+                    
+            default:            break;
+                    }
+            flag = NOT_RECEIVED;  
+                }
         
         switch(byte_C){
  
