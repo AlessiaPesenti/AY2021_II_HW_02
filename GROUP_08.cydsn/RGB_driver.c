@@ -13,10 +13,9 @@
 #include "RGB_driver.h"
 #include "InterruptRoutines.h"
 #include "project.h"
-
+#include "stdio.h"
 
 volatile uint8_t byte_C,byte_T, received, seconds;
-volatile uint8_t b;
 static void RGBLed_WriteRed (uint8_t red);
 static void RGBLed_Writegreen (uint8_t green);
 static void RGBLed_Writeblue (uint8_t blue);
@@ -33,7 +32,7 @@ void set_idle(){
         
         received = NOT_RECEIVED;
      
-        b=0;
+      
     }
 
 

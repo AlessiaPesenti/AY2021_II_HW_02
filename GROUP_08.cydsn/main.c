@@ -71,14 +71,45 @@ int main(void)
             flag = NOT_RECEIVED;  
                 }
         
-        switch(byte_C){
- 
-            case 5: RGBLed_setColor(input_color);// turn on the LED
-                    set_idle(); // Get ready for next color
-                    break;
+      //COLOR
+    if(flag == RECEIVED && byte_C != IDLE ) 
+        {   
+              
+            switch(byte_C){
                 
+            case RECEIVING_RED: input_color.red = received;           //Assigning RED to input_color
+                    byte_C ++;
+                    timer_count();
+                    break;
+                    
+            case RECEIVING_GREEN: input_color.green = received;         //Assigning GREEN to input_color
+                    byte_C ++;
+                    timer_count();
+                    break;
+                    
+            case RECEIVING_BLUE: input_color.blue = received;          //Assigning BLUE to input_color 
+                    byte_C ++;
+                    timer_count();
+                    break;
+                    
+            case RECEIVING_TAIL: if(received == TAIL_VALUE){           //Check if TAIL is the correct one, otherwise wait for it (until time runs out)
+                    RGBLed_setColor(input_color);         // Turn on the LED only if the correct TAIL is received
+                    set_idle();
+                    break;}
+            
+                    else break;
+            
             default: break;
+            }
+            
+            flag = NOT_RECEIVED;                          // Reset FLAG
         }
+        
+        
+        
+        
+        
+        
         
         switch(byte_T){
             
