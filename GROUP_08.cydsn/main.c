@@ -25,6 +25,7 @@
 
 
 static char message [20] = {'\0'};
+static color Black = {0,0,0};
 
 int main(void)
 {
@@ -37,6 +38,9 @@ int main(void)
     
     // Initialize FLAGS and counters to IDLE (everything to 0, timer stopped)
     set_idle();
+    
+    // Set black color
+    RGBLed_setColor(Black);
     
     // Initialize timeout to 5 seconds
     timeout = DEFAULT_5S; 
@@ -106,27 +110,38 @@ int main(void)
         }
         
         
-        
-        
-        
-        
-        
-        switch(byte_T){
+    //TIMEOUT
+    if( flag == RECEIVED && byte_T != IDLE )
+        {      
+     
+            switch(byte_T){           
+                
+            case RECEIVING_TIMEOUT:
+                    if(received >= 1 && received <= 20 ){ //Check if the value is in the range 1-20 seconds
+
+                    timeout = received;                   //Assign the new value
+                    byte_T ++;
+                    break;}
+                    
+                    else {set_idle();                     //If the value is out of range, reset to IDLE
+                          break;}
+
+            case RECEIVING_TAIL_TIME: 
+                    if(received == TAIL_VALUE){           //Chek if TAIL is the correct one
+                    set_idle();                           //After setting the new timeout, go back to IDLE
+                    break;}
             
-            case 3: set_idle();
-                    break;
+                    else {timeout = DEFAULT_5S;
+                          set_idle();
+                          break;}                         //If TAIL is wrong, set the default (5s) value and reset to IDLE
             
             default: break;
             }
-        
-        if (connection == RECEIVED && b == 0){
-            sprintf(message, "RGB LED Program $$$\r\n");
-            //send through UART
-            UART_PutString(message);
-            b++;
+            
+            flag = NOT_RECEIVED;                          //Reset FLAG
         }
         
-       
+   
     }
 
 }

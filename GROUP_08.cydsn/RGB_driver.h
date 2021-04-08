@@ -26,7 +26,7 @@
     void RGBLed_Start();
    
     //function which will set the color
-    void RGBLed_setColor();
+    void RGBLed_setColor(color c);
     
     //function that resets to idle the state of LED
     void set_idle();

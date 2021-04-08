@@ -31,7 +31,7 @@ void set_idle(){
         Timer_Stop();
         
         received = NOT_RECEIVED;
-     
+        flag = NOT_RECEIVED;
       
     }
 
