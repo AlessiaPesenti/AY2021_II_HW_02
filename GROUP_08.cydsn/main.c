@@ -1,71 +1,147 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * ASSIGNMENT 02 - GROUP 08
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * @authors Giovanni Parrella & Alessia Pesenti
+ * @date 08/04/2021
  *
  * ========================================
 */
+/*
+ * RGB LED Color selection project - CY8CKIT-059 KIT - See TopDesign for more info on the hardware connections/settings.
+ *
+ * This project can be used to turn on a RGB LED, selecting the color through a custom GUI and UART communication.
+ * Baude rate was set to 9600.
+ * In order to communicate the color, the following packet must be sent: [0XA0(160), Red (0-255), Green(0-255), Blue(0-255), 0XC0(192)]
+ * The timeout configuration can be useful when testing this code on a serial port terminal app (as CoolTerm). 
+ * In order to communicate the timeout value, the following packet must be sent: [0XA1(161), timeout value(1-20), 0XC0(192)].
+
+*/
+
 #include "project.h"
 #include "stdio.h"
 #include "RGB_driver.h"
 #include "InterruptRoutines.h"
 
-volatile uint8_t byte_C, byte_T, seconds, timeout;
-volatile uint8_t header_C, header_T,status,connection;
-volatile color input_color;
 
-extern volatile uint8_t b;
 static char message [20] = {'\0'};
+static color Black = {0,0,0};
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
-      /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    
+    // Start PWM and UART
     RGBLed_Start();
     UART_Start();
     
-    set_idle();//init
-    timeout = 5; 
+    // Initialize FLAGS and counters to IDLE (everything to 0, timer stopped)
+    set_idle();
     
-    isr_Timer_StartEx(Custom_TIMER_ISR);
+    // Set black color
+    RGBLed_setColor(Black);
+    
+    // Initialize timeout to 5 seconds
+    timeout = DEFAULT_5S; 
+    
+    // Start ISRs with custom functions
+    isr_Timer_StartEx(Custom_Timer_ISR);
     isr_UART_StartEx(Custom_UART_RX_ISR);
     
        
     for(;;)
     {
-        /* Place your application code here. */
+        if (flag == RECEIVED && byte_C == IDLE && byte_T == IDLE){
+                    
+                           
+            switch(received) {
+            case HEADER_COLOR:  byte_C = HEADER_RECEIVED; //note that = RECEIVING RED
+                                //Start timeout
+                                timer_count();
+                                break;
+                                        
+            case HEADER_TIMER:  byte_T = HEADER_RECEIVED;
+                                break;
+                                        
+            case CONNECTION_CMD:sprintf(message, "RGB LED Program $$$");   //If the command 'v' is received, print the string "RGB LED Program $$$"
+                                //send through UART
+                                UART_PutString(message);
+                                set_idle();
+                                break;
+                    
+            default:            break;
+                    }
+            flag = NOT_RECEIVED;  
+                }
         
-        
-        switch(byte_C){
- 
-            case 5: RGBLed_setColor(input_color);// turn on the LED
-                    set_idle(); // Get ready for next color
-                    break;
+      //COLOR
+    if(flag == RECEIVED && byte_C != IDLE ) 
+        {   
+              
+            switch(byte_C){
                 
-            default: break;
-        }
-        
-        switch(byte_T){
-            
-            case 3: set_idle();
+            case RECEIVING_RED: input_color.red = received;           //Assigning RED to input_color
+                    byte_C ++;
+                    timer_count();
                     break;
+                    
+            case RECEIVING_GREEN: input_color.green = received;         //Assigning GREEN to input_color
+                    byte_C ++;
+                    timer_count();
+                    break;
+                    
+            case RECEIVING_BLUE: input_color.blue = received;          //Assigning BLUE to input_color 
+                    byte_C ++;
+                    timer_count();
+                    break;
+                    
+            case RECEIVING_TAIL: if(received == TAIL_VALUE){           //Check if TAIL is the correct one, otherwise wait for it (until time runs out)
+                    RGBLed_setColor(input_color);         // Turn on the LED only if the correct TAIL is received
+                    set_idle();
+                    break;}
+            
+                    else break;
             
             default: break;
             }
-        
-        if (connection == RECEIVED && b == 0){
-            sprintf(message, "RGB LED Program $$$\r\n");
-            //send through UART
-            UART_PutString(message);
-            b++;
+            
+            flag = NOT_RECEIVED;                          // Reset FLAG
         }
         
-       
+        
+    //TIMEOUT
+    if( flag == RECEIVED && byte_T != IDLE )
+        {      
+     
+            switch(byte_T){           
+                
+            case RECEIVING_TIMEOUT:
+                    if(received >= 1 && received <= 20 ){ //Check if the value is in the range 1-20 seconds
+
+                    timeout = received;                   //Assign the new value
+                    byte_T ++;
+                    break;}
+                    
+                    else {set_idle();                     //If the value is out of range, reset to IDLE
+                          break;}
+
+            case RECEIVING_TAIL_TIME: 
+                    if(received == TAIL_VALUE){           //Chek if TAIL is the correct one
+                    set_idle();                           //After setting the new timeout, go back to IDLE
+                    break;}
+            
+                    else {timeout = DEFAULT_5S;
+                          set_idle();
+                          break;}                         //If TAIL is wrong, set the default (5s) value and reset to IDLE
+            
+            default: break;
+            }
+            
+            flag = NOT_RECEIVED;                          //Reset FLAG
+        }
+        
+   
     }
 
 }
