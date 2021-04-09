@@ -1,14 +1,19 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * ASSIGNMENT 02 - GROUP 08
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * @authors Giovanni Parrella & Alessia Pesenti
+ * @date 09/04/2021
  *
  * ========================================
+*/ 
+
+/*
+*
+* Header RGB driver
+*
 */
+
 #ifndef __RGB_DRIVER_H__
     #define __RGB_DRIVER_H__
     

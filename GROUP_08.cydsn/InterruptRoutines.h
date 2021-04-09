@@ -1,14 +1,19 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * ASSIGNMENT 02 - GROUP 08
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * @authors Giovanni Parrella & Alessia Pesenti
+ * @date 09/04/2021
  *
  * ========================================
+*/ 
+
+/*
+*
+* Header file for interrupt routines
+*
 */
+
 #define HEADER_COLOR 160
 #define TAIL_VALUE 192
 #define HEADER_TIMER 161
@@ -29,6 +34,7 @@
 
 #define RECEIVING_TIMEOUT 1
 #define RECEIVING_TAIL_TIME 2
+
 
 #ifndef __INTERRUPT_ROUTINES_H__
     #define __INTERRUPT_ROUTINES_H__
